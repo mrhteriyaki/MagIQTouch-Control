@@ -1,0 +1,9 @@
+C:\Users\Mitchell\Source\Repos\MagIQAirconControl\SeeleyControl\bin\Debug\SeeleyControl.dll
+C:\Users\Mitchell\Source\Repos\MagIQAirconControl\SeeleyControl\bin\Debug\SeeleyControl.pdb
+C:\Users\Mitchell\Source\Repos\MagIQAirconControl\SeeleyControl\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Mitchell\Source\Repos\MagIQAirconControl\SeeleyControl\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Mitchell\Source\Repos\MagIQAirconControl\SeeleyControl\obj\Debug\SeeleyControl.csprojAssemblyReference.cache
+C:\Users\Mitchell\Source\Repos\MagIQAirconControl\SeeleyControl\obj\Debug\SeeleyControl.csproj.CoreCompileInputs.cache
+C:\Users\Mitchell\Source\Repos\MagIQAirconControl\SeeleyControl\obj\Debug\SeeleyControl.csproj.CopyComplete
+C:\Users\Mitchell\Source\Repos\MagIQAirconControl\SeeleyControl\obj\Debug\SeeleyControl.dll
+C:\Users\Mitchell\Source\Repos\MagIQAirconControl\SeeleyControl\obj\Debug\SeeleyControl.pdb
