@@ -38,9 +38,12 @@ namespace Aircon_Control_Windows
             this.rbtCoolerFanOnly = new System.Windows.Forms.RadioButton();
             this.rbtCooler = new System.Windows.Forms.RadioButton();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
+            this.txtHeaterFanSpeed = new System.Windows.Forms.TextBox();
             this.txtHeaterTemp = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.lblPumpStatus = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.rbtCoolerManual = new System.Windows.Forms.RadioButton();
@@ -60,13 +63,20 @@ namespace Aircon_Control_Windows
             this.txtSystemRunning = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.txtHeaterFanSpeed = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.txtSystemStatus = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.lblTouchCount = new System.Windows.Forms.Label();
+            this.lblZoneTemps = new System.Windows.Forms.Label();
+            this.btnRefreshInfo = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            this.groupBox6.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -173,10 +183,19 @@ namespace Aircon_Control_Windows
             this.groupBox3.Controls.Add(this.txtHeaterTemp);
             this.groupBox3.Location = new System.Drawing.Point(372, 96);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(354, 75);
+            this.groupBox3.Size = new System.Drawing.Size(354, 50);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Heater Config";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(115, 21);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(152, 13);
+            this.label9.TabIndex = 7;
+            this.label9.Text = "Speed (1-10) (Fan Only Mode):";
             // 
             // label6
             // 
@@ -186,6 +205,14 @@ namespace Aircon_Control_Windows
             this.label6.Size = new System.Drawing.Size(37, 13);
             this.label6.TabIndex = 7;
             this.label6.Text = "Temp:";
+            // 
+            // txtHeaterFanSpeed
+            // 
+            this.txtHeaterFanSpeed.Location = new System.Drawing.Point(273, 18);
+            this.txtHeaterFanSpeed.Name = "txtHeaterFanSpeed";
+            this.txtHeaterFanSpeed.Size = new System.Drawing.Size(52, 20);
+            this.txtHeaterFanSpeed.TabIndex = 6;
+            this.txtHeaterFanSpeed.TextChanged += new System.EventHandler(this.txtHeaterFanSpeed_TextChanged);
             // 
             // txtHeaterTemp
             // 
@@ -197,6 +224,7 @@ namespace Aircon_Control_Windows
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.lblPumpStatus);
             this.groupBox4.Controls.Add(this.label5);
             this.groupBox4.Controls.Add(this.label4);
             this.groupBox4.Controls.Add(this.rbtCoolerManual);
@@ -205,10 +233,19 @@ namespace Aircon_Control_Windows
             this.groupBox4.Controls.Add(this.txtCoolerTemp);
             this.groupBox4.Location = new System.Drawing.Point(12, 96);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(354, 75);
+            this.groupBox4.Size = new System.Drawing.Size(354, 99);
             this.groupBox4.TabIndex = 3;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Cooler Config";
+            // 
+            // lblPumpStatus
+            // 
+            this.lblPumpStatus.AutoSize = true;
+            this.lblPumpStatus.Location = new System.Drawing.Point(10, 71);
+            this.lblPumpStatus.Name = "lblPumpStatus";
+            this.lblPumpStatus.Size = new System.Drawing.Size(70, 13);
+            this.lblPumpStatus.TabIndex = 6;
+            this.lblPumpStatus.Text = "Pump Status:";
             // 
             // label5
             // 
@@ -271,9 +308,9 @@ namespace Aircon_Control_Windows
             // btnSendCommand
             // 
             this.btnSendCommand.Enabled = false;
-            this.btnSendCommand.Location = new System.Drawing.Point(576, 177);
+            this.btnSendCommand.Location = new System.Drawing.Point(732, 155);
             this.btnSendCommand.Name = "btnSendCommand";
-            this.btnSendCommand.Size = new System.Drawing.Size(150, 48);
+            this.btnSendCommand.Size = new System.Drawing.Size(130, 40);
             this.btnSendCommand.TabIndex = 0;
             this.btnSendCommand.Text = "Send Command";
             this.btnSendCommand.UseVisualStyleBackColor = true;
@@ -345,11 +382,11 @@ namespace Aircon_Control_Windows
             // 
             // btnLogon
             // 
-            this.btnLogon.Location = new System.Drawing.Point(420, 177);
+            this.btnLogon.Location = new System.Drawing.Point(732, 17);
             this.btnLogon.Name = "btnLogon";
-            this.btnLogon.Size = new System.Drawing.Size(150, 48);
+            this.btnLogon.Size = new System.Drawing.Size(158, 40);
             this.btnLogon.TabIndex = 5;
-            this.btnLogon.Text = "Login AWS";
+            this.btnLogon.Text = "Login";
             this.btnLogon.UseVisualStyleBackColor = true;
             this.btnLogon.Click += new System.EventHandler(this.btnLogon_Click);
             // 
@@ -387,28 +424,93 @@ namespace Aircon_Control_Windows
             this.label8.TabIndex = 9;
             this.label8.Text = "Running Info:";
             // 
-            // label9
+            // button1
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(115, 21);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(152, 13);
-            this.label9.TabIndex = 7;
-            this.label9.Text = "Speed (1-10) (Fan Only Mode):";
+            this.button1.Location = new System.Drawing.Point(1004, 155);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(130, 40);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "Log AWS Auth Tokens to File";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // txtHeaterFanSpeed
+            // button5
             // 
-            this.txtHeaterFanSpeed.Location = new System.Drawing.Point(273, 18);
-            this.txtHeaterFanSpeed.Name = "txtHeaterFanSpeed";
-            this.txtHeaterFanSpeed.Size = new System.Drawing.Size(52, 20);
-            this.txtHeaterFanSpeed.TabIndex = 6;
-            this.txtHeaterFanSpeed.TextChanged += new System.EventHandler(this.txtHeaterFanSpeed_TextChanged);
+            this.button5.Location = new System.Drawing.Point(868, 155);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(130, 40);
+            this.button5.TabIndex = 13;
+            this.button5.Text = "Refresh System Info from MQTT";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // txtSystemStatus
+            // 
+            this.txtSystemStatus.Location = new System.Drawing.Point(732, 235);
+            this.txtSystemStatus.Multiline = true;
+            this.txtSystemStatus.Name = "txtSystemStatus";
+            this.txtSystemStatus.Size = new System.Drawing.Size(388, 566);
+            this.txtSystemStatus.TabIndex = 14;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(732, 216);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(111, 13);
+            this.label10.TabIndex = 15;
+            this.label10.Text = "MQTT System Status:";
+            // 
+            // groupBox6
+            // 
+            this.groupBox6.Controls.Add(this.lblTouchCount);
+            this.groupBox6.Controls.Add(this.lblZoneTemps);
+            this.groupBox6.Location = new System.Drawing.Point(372, 152);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Size = new System.Drawing.Size(354, 43);
+            this.groupBox6.TabIndex = 16;
+            this.groupBox6.TabStop = false;
+            this.groupBox6.Text = "Status:";
+            // 
+            // lblTouchCount
+            // 
+            this.lblTouchCount.AutoSize = true;
+            this.lblTouchCount.Location = new System.Drawing.Point(241, 15);
+            this.lblTouchCount.Name = "lblTouchCount";
+            this.lblTouchCount.Size = new System.Drawing.Size(72, 13);
+            this.lblTouchCount.TabIndex = 1;
+            this.lblTouchCount.Text = "Touch Count:";
+            // 
+            // lblZoneTemps
+            // 
+            this.lblZoneTemps.AutoSize = true;
+            this.lblZoneTemps.Location = new System.Drawing.Point(8, 17);
+            this.lblZoneTemps.Name = "lblZoneTemps";
+            this.lblZoneTemps.Size = new System.Drawing.Size(70, 13);
+            this.lblZoneTemps.TabIndex = 0;
+            this.lblZoneTemps.Text = "Zone Temps:";
+            // 
+            // btnRefreshInfo
+            // 
+            this.btnRefreshInfo.Location = new System.Drawing.Point(732, 63);
+            this.btnRefreshInfo.Name = "btnRefreshInfo";
+            this.btnRefreshInfo.Size = new System.Drawing.Size(158, 40);
+            this.btnRefreshInfo.TabIndex = 17;
+            this.btnRefreshInfo.Text = "Refresh Info (Web Request)";
+            this.btnRefreshInfo.UseVisualStyleBackColor = true;
+            this.btnRefreshInfo.Click += new System.EventHandler(this.btnRefreshInfo_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(746, 813);
+            this.ClientSize = new System.Drawing.Size(1180, 817);
+            this.Controls.Add(this.btnRefreshInfo);
+            this.Controls.Add(this.groupBox6);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.txtSystemStatus);
+            this.Controls.Add(this.button5);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.txtSystemRunning);
@@ -433,6 +535,8 @@ namespace Aircon_Control_Windows
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -473,6 +577,15 @@ namespace Aircon_Control_Windows
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox txtHeaterFanSpeed;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.TextBox txtSystemStatus;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label lblPumpStatus;
+        private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.Label lblZoneTemps;
+        private System.Windows.Forms.Button btnRefreshInfo;
+        private System.Windows.Forms.Label lblTouchCount;
     }
 }
 

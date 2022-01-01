@@ -57,17 +57,40 @@ namespace AWSMQTT
 
         MqttClient mqClient;
 
-        public void MQTTClientInit(IMqttClientConnectedHandler ConnectedHandler, IMqttApplicationMessageReceivedHandler MessageReceivedHander, IMqttClientDisconnectedHandler DisconnectHandler)
+
+        public void MQTTClientInit()
         {
+            AWS_IOT_GATEWAY = "ab7hzia9uew8g-ats.iot.ap-southeast-2.amazonaws.com";
+            AWS_USER_POOL_ID = "ap-southeast-2_uw5VVNlib";
+            AWS_CLIENT_ID = "6e1lu9fchv82uefiarsp0290v9";
+            AWS_POOL_ID = "ap-southeast-2:0ed20c23-4af8-4408-86fc-b78689a5c7a7";
+            AWS_REGION_ENDPOINT = Amazon.RegionEndpoint.APSoutheast2;
+
             MqttFactory mqFactory = new MqttFactory();
             mqClient = (MqttClient)mqFactory.CreateMqttClient();
+            //Event Handlers for MQTT
+            //mqClient.UseConnectedHandler(ConnectedHandler);
+            //mqClient.UseApplicationMessageReceivedHandler(MessageReceivedHander);
+            //mqClient.UseDisconnectedHandler(DisconnectHandler);
+
+
+        }
+        //MqttClientConnectedEventArgs
+        //MqttApplicationMessageReceivedEventArgs
+        //MqttClientDisconnectedEventArgs
+        public void MQTTClientInit(Action<MqttClientConnectedEventArgs> ConnectedHandler, Action<MqttApplicationMessageReceivedEventArgs> MessageReceivedHander, Action<MqttClientDisconnectedEventArgs> DisconnectHandler)
+        {
+            MQTTClientInit();
             //Event Handlers for MQTT
             mqClient.UseConnectedHandler(ConnectedHandler);
             mqClient.UseApplicationMessageReceivedHandler(MessageReceivedHander);
             mqClient.UseDisconnectedHandler(DisconnectHandler);
+
         }
 
-  
+
+
+
         public async Task MQTTClientConnect(string URI)
         {
             MqttClientOptionsBuilder MQOptions = new MqttClientOptionsBuilder();
@@ -75,8 +98,15 @@ namespace AWSMQTT
             MQOptions.WithWebSocketServer(URI);
             MQOptions.WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V311);
             MQOptions.WithTls();
-
+            
             await mqClient.ConnectAsync(MQOptions.Build()).ConfigureAwait(false);
+
+            
+        }
+
+        public async Task MQTTDisconnect()
+        {
+           await mqClient.DisconnectAsync();
         }
 
         public async Task MQTTPublish(string Topic, string Payload)
@@ -108,9 +138,6 @@ namespace AWSMQTT
 
         public void LoginUser()
         {
-
-            try
-            {
                 AmazonCognitoIdentityProviderClient _provider = new AmazonCognitoIdentityProviderClient((AWSCredentials)new AnonymousAWSCredentials(), RegionEndpoint.APSoutheast2);
                 CognitoUserPool pool = new CognitoUserPool(AWS_USER_POOL_ID, AWS_CLIENT_ID, _provider);
                 CognitoUser cognitoUser = new CognitoUser(AWS_Username, AWS_CLIENT_ID, pool, _provider);
@@ -120,34 +147,29 @@ namespace AWSMQTT
                 }).Wait();
                 COGNITO_USER = cognitoUser;
 
-                COGNITO_AWS_CREDENTIALS = COGNITO_USER.GetCognitoAWSCredentials(AWS_POOL_ID, AWS_REGION_ENDPOINT);
-                AWS_CREDENTIALS = COGNITO_AWS_CREDENTIALS.GetCredentials();
+                RefreshCognitoAWScredentials();
+        }
 
 
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+        
+        public void RefreshToken()
+        {
+               COGNITO_USER.SessionTokens = new CognitoUserSession((string)null, COGNITO_USER.SessionTokens.AccessToken, COGNITO_USER.SessionTokens.RefreshToken, DateTime.Now, DateTime.Now.AddDays(3.0));
+               COGNITO_USER.StartWithRefreshTokenAuthAsync(new InitiateRefreshTokenAuthRequest()
+                {
+                    AuthFlowType = AuthFlowType.REFRESH_TOKEN
+                }).Wait();
+                
+               RefreshCognitoAWScredentials();
 
         }
 
 
-        //Not in use / incomplete testing.
-        void RefreshToken()
+        public void RefreshCognitoAWScredentials()
         {
-            try
-            {
-                COGNITO_USER.SessionTokens = new CognitoUserSession((string)null, COGNITO_USER.SessionTokens.AccessToken, COGNITO_USER.SessionTokens.RefreshToken, DateTime.Now, DateTime.Now.AddDays(3.0));
-                COGNITO_USER.StartWithRefreshTokenAuthAsync(new InitiateRefreshTokenAuthRequest()
-                {
-                    AuthFlowType = AuthFlowType.REFRESH_TOKEN
-                }).Wait();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            COGNITO_AWS_CREDENTIALS = COGNITO_USER.GetCognitoAWSCredentials(AWS_POOL_ID, AWS_REGION_ENDPOINT);
+            AWS_CREDENTIALS = COGNITO_AWS_CREDENTIALS.GetCredentials();
+
         }
 
 
@@ -155,6 +177,34 @@ namespace AWSMQTT
         {
             return COGNITO_USER.SessionTokens.IdToken;
         }
+
+        public string GetAWSIdToken()
+        {
+            return AWS_CREDENTIALS.Token;
+        }
+
+
+        public string GetAccessToken()
+        {
+            return COGNITO_USER.SessionTokens.AccessToken;
+        }
+
+        public string GetAWSAccessKey()
+        {
+            return AWS_CREDENTIALS.AccessKey;
+        }
+
+        public string GetAWSSecret()
+        {
+            return AWS_CREDENTIALS.SecretKey;
+            
+        }
+
+        public string GetExpiry()
+        {
+            return COGNITO_USER.SessionTokens.ExpirationTime.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+        
 
         public string GenerateURI()
         {
@@ -262,6 +312,10 @@ namespace AWSMQTT
 
         public DateTime GetLogonExpiry()
         {
+            if (COGNITO_USER == null)
+            {
+                return DateTime.Now;
+            }
             return COGNITO_USER.SessionTokens.ExpirationTime;
         }
 

@@ -18,6 +18,8 @@ using SeeleyControl;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using MQTTnet;
+using System.Reflection;
 
 namespace Aircon_Control_Windows
 {
@@ -27,7 +29,7 @@ namespace Aircon_Control_Windows
         SCData UnitConfig = new SCData();
         string URI = "";
         string SYSTEM_MAC = "";
-
+        
 
         public Form1()
         {
@@ -38,6 +40,31 @@ namespace Aircon_Control_Windows
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            if (System.IO.File.Exists("auth.ini"))
+            {
+                string[] config = System.IO.File.ReadAllLines("auth.ini");
+                for (int i = 0; i < config.Count(); i++)
+                {
+                    if (config[i].StartsWith("user="))
+                    {
+                        txtUsername.Text = config[i].Split(char.Parse("="))[1];
+                    }
+                    if (config[i].StartsWith("pass="))
+                    {
+                        txtPassword.Text = config[i].Split(char.Parse("="))[1];
+                    }
+                }
+
+            }
+            else
+            {
+                MessageBox.Show("No Auth information saved, add to auth.ini file for auto-load.");
+                System.IO.StreamWriter SW = new System.IO.StreamWriter("auth.ini");
+                SW.WriteLine("user=");
+                SW.WriteLine("pass=");
+                SW.Close();
+            }
+
 
             AMClient.AWS_IOT_GATEWAY = "ab7hzia9uew8g-ats.iot.ap-southeast-2.amazonaws.com";
             AMClient.AWS_USER_POOL_ID = "ap-southeast-2_uw5VVNlib";
@@ -49,7 +76,66 @@ namespace Aircon_Control_Windows
             Random rnd = new Random();
             AMClient.MQTT_CLIENT_ID = "MagIQ" + rnd.Next().ToString();
 
+
+            //Initialise MQTT Client.
+            //AMClient.MQTTClientInit((IMqttClientConnectedHandler)null, (IMqttApplicationMessageReceivedHandler)null, (IMqttClientDisconnectedHandler)null);
+            AMClient.MQTTClientInit(MQTTConnectedHandler, MQTTMessageHandler, MQTTDisconnectHandler);
+
+
+
+
         }
+
+        //MqttClientConnectedEventArgs
+        //MqttApplicationMessageReceivedEventArgs
+        //MqttClientDisconnectedEventArgs
+
+
+        //Event when MQTT Client connected.
+        void MQTTConnectedHandler(MqttClientConnectedEventArgs e)
+        {
+            //MessageBox.Show("Connected");
+        }
+
+        void MQTTMessageHandler(MqttApplicationMessageReceivedEventArgs e)
+        {
+            //MessageBox.Show(e.ApplicationMessage.ToString());
+           string StatusInfoStr = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+
+            JObject SystemStatus = JObject.Parse(StatusInfoStr);
+            //MessageBox.Show(SystemStatus["SystemOn"].ToString());
+            //MessageBox.Show(SystemStatus["TimeRunning"].ToString());
+            
+
+            SetStatusInfoText(StatusInfoStr);
+
+        }
+
+        //Event when mqtt client disconnects
+
+        void MQTTDisconnectHandler(MqttClientDisconnectedEventArgs e)
+        {
+            //MessageBox.Show("Disconnected");
+        }
+
+        
+        private delegate void SafeCallDelegate(string text);
+        private void SetStatusInfoText(string text)
+        {
+            if (txtSystemStatus.InvokeRequired)
+            {
+                var d = new SafeCallDelegate(SetStatusInfoText);
+                txtSystemStatus.Invoke(d, new object[] { text });
+            }
+            else
+            {
+                txtSystemStatus.Text = text;
+            }
+        }
+
+
+
+
 
         private void rbtOn_CheckedChanged(object sender, EventArgs e)
         {
@@ -100,29 +186,35 @@ namespace Aircon_Control_Windows
 
         private void btnSendCommand_Click(object sender, EventArgs e)
         {
-                       
-            
-            string SUBSCRIBE_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRealTime";
+            btnSendCommand.Enabled = false;
             string PUBLISH_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRequest";
+            AMClient.MQTTClientConnect(URI).Wait(); //Connect MQTT Client.
+            AMClient.MQTTPublish(PUBLISH_TOPIC, UnitConfig.GetJsonData()).Wait();
+            AMClient.MQTTDisconnect().Wait();
+
+            btnSendCommand.Enabled = true;
+            
+        }
+
+        void RefreshDeviceStatus()
+        {
+            //Send MQTT message to request status refresh.
+            string PUBLISH_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRequest";
+            string SUBSCRIBE_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRealTime";
+            string REFRESH_MESSAGE_CONTENT = "{\"SerialNo\":\"" + SYSTEM_MAC + "\",\"Status\":1}";
+
+            AMClient.MQTTClientConnect(URI).Wait();
+            AMClient.MQTTSubscribe(SUBSCRIBE_TOPIC).Wait();
+            AMClient.MQTTPublish(PUBLISH_TOPIC, REFRESH_MESSAGE_CONTENT).Wait();
+
+            //MQTT client will disconnect after about a minute.
 
             
-
-            //Initialise MQTT Client.
-            AMClient.MQTTClientInit((IMqttClientConnectedHandler)null, (IMqttApplicationMessageReceivedHandler)null, (IMqttClientDisconnectedHandler)null);
-
-            AMClient.MQTTClientConnect(URI).Wait(); //Connect MQTT Client.
-
-            //AMClient.MQTTSubscribe("SeeleyIoT/9070652C0B27/MobileRealTime").Wait();
-            AMClient.MQTTPublish(PUBLISH_TOPIC, UnitConfig.GetJsonData()).Wait();
-
-            ShowInfo();
         }
 
         private void btnLogon_Click(object sender, EventArgs e)
         {
-            AMClient.SetAuth(txtUsername.Text, txtPassword.Text);
-            AMClient.LoginUser(); //Connect to AWS for Auth Tokens.
-            URI = AMClient.GenerateURI(); //Generate AWS URI with Signature V4 Auth.
+            CheckLogon();
 
             btnLogon.Text = "Logon AWS" + Environment.NewLine + "Expires:" + AMClient.GetLogonExpiry().ToString("yyyy-MM-dd HH:mm:ss");
             btnSendCommand.Enabled = true;
@@ -137,11 +229,110 @@ namespace Aircon_Control_Windows
             ShowInfo();
             
         }
+
+
+        void CheckLogon()
+        {
+            
+            //if (AMClient.GetLogonExpiry() <= DateTime.Now)
+            //{
+                AMClient.SetAuth(txtUsername.Text, txtPassword.Text);
+                AMClient.LoginUser(); //Connect to AWS for Auth Tokens.
+                URI = AMClient.GenerateURI(); //Generate AWS URI with Signature V4 Auth.
+            //}
+            //else
+            //{
+                AMClient.RefreshToken();
+
+            //}
+
+
+
+        }
+        
         private void ShowInfo()
         {
-            txtSystemDetails.Text = SCData.WebDataQuery("loadsystemdetails?macAddressId=" + SYSTEM_MAC, AMClient.GetIDToken());
-            txtSystemRunning.Text = SCData.WebDataQuery("loadsystemrunning?macAddressId=" + SYSTEM_MAC, AMClient.GetIDToken());
+            string SystemDetailsStr = SCData.WebDataQuery("loadsystemdetails?macAddressId=" + SYSTEM_MAC, AMClient.GetIDToken());
+            string RunningDataStr = SCData.WebDataQuery("loadsystemrunning?macAddressId=" + SYSTEM_MAC, AMClient.GetIDToken());
+            
+            SLSystemDetails SystemDetails = JsonConvert.DeserializeObject<SLSystemDetails>(SystemDetailsStr);
+            SLSystemRunning RunningDetails = JsonConvert.DeserializeObject<SLSystemRunning>(RunningDataStr);
+
+            txtSystemDetails.Text = SystemDetailsStr;
+            txtSystemRunning.Text = RunningDataStr;
+
+
+
+            if (RunningDetails.SystemOn == 1)
+            {
+                rbtOn.Checked = true;
+            }
+            else
+            {
+                rbtOff.Checked = true;
+            }
+
+            if (RunningDetails.HRunning == 1)
+            {
+                if (RunningDetails.HFanOnly == 1)
+                {
+                    rbtHeaterFanOnly.Checked = true;
+                }
+                else
+                {
+                    rbtHeater.Checked = true;
+                }
+            }
+            else if (RunningDetails.EvapCRunning == 1)
+            {
+                if (RunningDetails.CFanOnlyOrCool == 1)
+                {
+                    rbtCoolerFanOnly.Checked = true;
+
+                }
+                else
+                {
+                    rbtCooler.Checked = true;
+                }
+
+            }
+
+            txtCoolerSpeed.Text = RunningDetails.CFanSpeed.ToString();
+
+            txtCoolerTemp.Text = RunningDetails.CTemp.ToString();
+
+            if (RunningDetails.FanOrTempControl == 1)
+            {
+                rbtCoolerAuto.Checked = true;
+
+            }
+            else
+            {
+                rbtCoolerManual.Checked = true;
+            }
+
+            txtHeaterFanSpeed.Text = RunningDetails.HFanSpeed.ToString();
+
+            txtHeaterTemp.Text = RunningDetails.HTemp.ToString();
+
+            if (RunningDetails.PumpStatus == 1)
+            {
+                lblPumpStatus.Text = "Pump Status: On";
+            }
+            else 
+            { 
+                    lblPumpStatus.Text = "Pump Status: Off";
+            }
+
+            lblZoneTemps.Text = "Zone 1 (Upstairs):" + RunningDetails.ActualTempZone1 + "  Zone 2 (Downstairs):" + RunningDetails.ActualTempZone2;
+
+            lblTouchCount.Text = "Touch Count: " + RunningDetails.TouchCount;
+
         }
+
+
+
+
 
         private void rbtCoolerAuto_CheckedChanged(object sender, EventArgs e)
         {
@@ -180,7 +371,7 @@ namespace Aircon_Control_Windows
         {
             if (txtHeaterTemp.Text != "")
             {
-                UnitConfig.SetHeaterTemp(int.Parse(txtHeaterTemp.Text));
+                UnitConfig.SetZone1Temp(int.Parse(txtHeaterTemp.Text));
             }
         }
 
@@ -192,5 +383,56 @@ namespace Aircon_Control_Windows
             }
 
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            System.IO.StreamWriter writer = new System.IO.StreamWriter("tokenlog.txt");
+            
+            writer.WriteLine("AccessToken :" + AMClient.GetAccessToken());
+            writer.WriteLine("ID Token    :" + AMClient.GetIDToken());
+            writer.WriteLine("Access Key  :" + AMClient.GetAWSAccessKey());
+            writer.WriteLine("AWS Secret  :" + AMClient.GetAWSSecret());
+            writer.WriteLine("AWS Id Token:" + AMClient.GetAWSIdToken());
+            writer.WriteLine("Expiry:" + AMClient.GetExpiry());
+            writer.Close();
+
+
+            //AMClient.RefreshCognitoAWScredentials();
+
+            //AMClient.LoginUser(); //Connect to AWS for Auth Tokens.
+            //URI = AMClient.GenerateURI(); //Generate AWS URI with Signature V4 Auth.
+
+
+            /*
+            string SUBSCRIBE_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRealTime";
+            string PUBLISH_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRequest";
+
+
+
+            //Initialise MQTT Client.
+            AMClient.MQTTClientInit((IMqttClientConnectedHandler)null, (IMqttApplicationMessageReceivedHandler)null, (IMqttClientDisconnectedHandler)null);
+
+            AMClient.MQTTClientConnect(URI).Wait(); //Connect MQTT Client.
+
+            //AMClient.MQTTSubscribe("SeeleyIoT/9070652C0B27/MobileRealTime").Wait();
+           // AMClient.MQTTPublish(PUBLISH_TOPIC, UnitConfig.GetJsonData()).Wait();
+
+            ShowInfo();
+            */
+        }
+             
+
+       
+        private void button5_Click(object sender, EventArgs e)
+        {
+            RefreshDeviceStatus();
+        }
+
+        private void btnRefreshInfo_Click(object sender, EventArgs e)
+        {
+            ShowInfo();
+        }
+
+       
     }
 }
