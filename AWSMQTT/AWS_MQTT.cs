@@ -35,13 +35,13 @@ namespace AWSMQTT
 {
     public class AWS_MQTT
     {
-        public string AWS_IOT_GATEWAY; //example.iot.ap-southeast-2.amazonaws.com
-        public string AWS_USER_POOL_ID;
-        public string AWS_CLIENT_ID;
-        public string AWS_POOL_ID;
-        public string MQTT_CLIENT_ID;
+        string AWS_IOT_GATEWAY; //example.iot.ap-southeast-2.amazonaws.com
+        string AWS_USER_POOL_ID;
+        string AWS_CLIENT_ID;
+        string AWS_POOL_ID;
+        string MQTT_CLIENT_ID;
         
-        public RegionEndpoint AWS_REGION_ENDPOINT;
+        RegionEndpoint AWS_REGION_ENDPOINT;
 
         static ImmutableCredentials AWS_CREDENTIALS;
         static CognitoAWSCredentials COGNITO_AWS_CREDENTIALS;
@@ -55,25 +55,27 @@ namespace AWSMQTT
             AWS_Password = password;
         }
 
-        MqttClient mqClient;
+        public MqttClient mqClient;
 
 
         public void MQTTClientInit()
         {
             AWS_IOT_GATEWAY = "ab7hzia9uew8g-ats.iot.ap-southeast-2.amazonaws.com";
             AWS_USER_POOL_ID = "ap-southeast-2_uw5VVNlib";
-            AWS_CLIENT_ID = "6e1lu9fchv82uefiarsp0290v9";
-            AWS_POOL_ID = "ap-southeast-2:0ed20c23-4af8-4408-86fc-b78689a5c7a7";
+            //AWS_CLIENT_ID = "6e1lu9fchv82uefiarsp0290v9"; //Replaced on app update.
+            AWS_CLIENT_ID = "afh7fftbb0fg2rnagdbgd9b7b";
+
+            //AWS_POOL_ID = "ap-southeast-2:0ed20c23-4af8-4408-86fc-b78689a5c7a7"; //Replaced on app update.
+            AWS_POOL_ID = "ap-southeast-2:87af6d7b-28ef-4014-88f1-67b19c361221";
             AWS_REGION_ENDPOINT = Amazon.RegionEndpoint.APSoutheast2;
+
+            //Set MQTT Client ID
+            Random rnd = new Random();
+            MQTT_CLIENT_ID = "MagIQ" + rnd.Next().ToString();
 
             MqttFactory mqFactory = new MqttFactory();
             mqClient = (MqttClient)mqFactory.CreateMqttClient();
-            //Event Handlers for MQTT
-            //mqClient.UseConnectedHandler(ConnectedHandler);
-            //mqClient.UseApplicationMessageReceivedHandler(MessageReceivedHander);
-            //mqClient.UseDisconnectedHandler(DisconnectHandler);
-
-
+            
         }
         //MqttClientConnectedEventArgs
         //MqttApplicationMessageReceivedEventArgs

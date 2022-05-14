@@ -63,10 +63,8 @@ namespace Aircon_Control_Windows
             this.txtSystemRunning = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
-            this.txtSystemStatus = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
+            this.btnLogAuthToken = new System.Windows.Forms.Button();
+            this.btnRefresh = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.lblTouchCount = new System.Windows.Forms.Label();
             this.lblZoneTemps = new System.Windows.Forms.Label();
@@ -395,15 +393,15 @@ namespace Aircon_Control_Windows
             this.txtSystemDetails.Location = new System.Drawing.Point(12, 235);
             this.txtSystemDetails.Multiline = true;
             this.txtSystemDetails.Name = "txtSystemDetails";
-            this.txtSystemDetails.Size = new System.Drawing.Size(320, 566);
+            this.txtSystemDetails.Size = new System.Drawing.Size(424, 566);
             this.txtSystemDetails.TabIndex = 6;
             // 
             // txtSystemRunning
             // 
-            this.txtSystemRunning.Location = new System.Drawing.Point(338, 235);
+            this.txtSystemRunning.Location = new System.Drawing.Point(442, 235);
             this.txtSystemRunning.Multiline = true;
             this.txtSystemRunning.Name = "txtSystemRunning";
-            this.txtSystemRunning.Size = new System.Drawing.Size(388, 566);
+            this.txtSystemRunning.Size = new System.Drawing.Size(692, 566);
             this.txtSystemRunning.TabIndex = 7;
             // 
             // label7
@@ -418,48 +416,31 @@ namespace Aircon_Control_Windows
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(335, 212);
+            this.label8.Location = new System.Drawing.Point(439, 212);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(71, 13);
             this.label8.TabIndex = 9;
             this.label8.Text = "Running Info:";
             // 
-            // button1
+            // btnLogAuthToken
             // 
-            this.button1.Location = new System.Drawing.Point(1004, 155);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(130, 40);
-            this.button1.TabIndex = 10;
-            this.button1.Text = "Log AWS Auth Tokens to File";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btnLogAuthToken.Location = new System.Drawing.Point(1004, 155);
+            this.btnLogAuthToken.Name = "btnLogAuthToken";
+            this.btnLogAuthToken.Size = new System.Drawing.Size(130, 40);
+            this.btnLogAuthToken.TabIndex = 10;
+            this.btnLogAuthToken.Text = "Log AWS Auth Tokens to File";
+            this.btnLogAuthToken.UseVisualStyleBackColor = true;
+            this.btnLogAuthToken.Click += new System.EventHandler(this.btnLogAuthTokens_Click);
             // 
-            // button5
+            // btnRefresh
             // 
-            this.button5.Location = new System.Drawing.Point(868, 155);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(130, 40);
-            this.button5.TabIndex = 13;
-            this.button5.Text = "Refresh System Info from MQTT";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
-            // 
-            // txtSystemStatus
-            // 
-            this.txtSystemStatus.Location = new System.Drawing.Point(732, 235);
-            this.txtSystemStatus.Multiline = true;
-            this.txtSystemStatus.Name = "txtSystemStatus";
-            this.txtSystemStatus.Size = new System.Drawing.Size(388, 566);
-            this.txtSystemStatus.TabIndex = 14;
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(732, 216);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(111, 13);
-            this.label10.TabIndex = 15;
-            this.label10.Text = "MQTT System Status:";
+            this.btnRefresh.Location = new System.Drawing.Point(868, 155);
+            this.btnRefresh.Name = "btnRefresh";
+            this.btnRefresh.Size = new System.Drawing.Size(130, 40);
+            this.btnRefresh.TabIndex = 13;
+            this.btnRefresh.Text = "Send Device Refresh Command";
+            this.btnRefresh.UseVisualStyleBackColor = true;
+            this.btnRefresh.Click += new System.EventHandler(this.btnRefreshMQTT_Click);
             // 
             // groupBox6
             // 
@@ -504,13 +485,11 @@ namespace Aircon_Control_Windows
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1180, 817);
+            this.ClientSize = new System.Drawing.Size(1150, 817);
             this.Controls.Add(this.btnRefreshInfo);
             this.Controls.Add(this.groupBox6);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.txtSystemStatus);
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnRefresh);
+            this.Controls.Add(this.btnLogAuthToken);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.txtSystemRunning);
@@ -577,10 +556,8 @@ namespace Aircon_Control_Windows
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox txtHeaterFanSpeed;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.TextBox txtSystemStatus;
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button btnLogAuthToken;
+        private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.Label lblPumpStatus;
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.Label lblZoneTemps;

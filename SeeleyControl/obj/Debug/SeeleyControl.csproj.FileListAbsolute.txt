@@ -1,9 +1,0 @@
-C:\Users\mrh\source\repos\magiqairconcontrol\SeeleyControl\bin\Debug\SeeleyControl.dll
-C:\Users\mrh\source\repos\magiqairconcontrol\SeeleyControl\bin\Debug\SeeleyControl.pdb
-C:\Users\mrh\source\repos\magiqairconcontrol\SeeleyControl\bin\Debug\Newtonsoft.Json.xml
-C:\Users\mrh\source\repos\magiqairconcontrol\SeeleyControl\obj\Debug\SeeleyControl.csproj.AssemblyReference.cache
-C:\Users\mrh\source\repos\magiqairconcontrol\SeeleyControl\obj\Debug\SeeleyControl.csproj.CoreCompileInputs.cache
-C:\Users\mrh\source\repos\magiqairconcontrol\SeeleyControl\obj\Debug\SeeleyControl.dll
-C:\Users\mrh\source\repos\magiqairconcontrol\SeeleyControl\obj\Debug\SeeleyControl.pdb
-C:\Users\mrh\source\repos\magiqairconcontrol\SeeleyControl\bin\Debug\Newtonsoft.Json.dll
-C:\Users\mrh\source\repos\magiqairconcontrol\SeeleyControl\obj\Debug\SeeleyControl.csproj.CopyComplete

@@ -65,23 +65,20 @@ namespace Aircon_Control_Windows
                 SW.Close();
             }
 
-
+            /*
             AMClient.AWS_IOT_GATEWAY = "ab7hzia9uew8g-ats.iot.ap-southeast-2.amazonaws.com";
             AMClient.AWS_USER_POOL_ID = "ap-southeast-2_uw5VVNlib";
             AMClient.AWS_CLIENT_ID = "6e1lu9fchv82uefiarsp0290v9";
             AMClient.AWS_POOL_ID = "ap-southeast-2:0ed20c23-4af8-4408-86fc-b78689a5c7a7";
             AMClient.AWS_REGION_ENDPOINT = Amazon.RegionEndpoint.APSoutheast2;
+            */
 
-            //Set MQTT Client ID
-            Random rnd = new Random();
-            AMClient.MQTT_CLIENT_ID = "MagIQ" + rnd.Next().ToString();
+            
 
 
             //Initialise MQTT Client.
             //AMClient.MQTTClientInit((IMqttClientConnectedHandler)null, (IMqttApplicationMessageReceivedHandler)null, (IMqttClientDisconnectedHandler)null);
             AMClient.MQTTClientInit(MQTTConnectedHandler, MQTTMessageHandler, MQTTDisconnectHandler);
-
-
 
 
         }
@@ -95,6 +92,8 @@ namespace Aircon_Control_Windows
         void MQTTConnectedHandler(MqttClientConnectedEventArgs e)
         {
             //MessageBox.Show("Connected");
+
+       
         }
 
         void MQTTMessageHandler(MqttApplicationMessageReceivedEventArgs e)
@@ -105,9 +104,8 @@ namespace Aircon_Control_Windows
             JObject SystemStatus = JObject.Parse(StatusInfoStr);
             //MessageBox.Show(SystemStatus["SystemOn"].ToString());
             //MessageBox.Show(SystemStatus["TimeRunning"].ToString());
-            
-
-            SetStatusInfoText(StatusInfoStr);
+          
+            //SetMQTTStatus(StatusInfoStr);
 
         }
 
@@ -116,26 +114,8 @@ namespace Aircon_Control_Windows
         void MQTTDisconnectHandler(MqttClientDisconnectedEventArgs e)
         {
             //MessageBox.Show("Disconnected");
+            
         }
-
-        
-        private delegate void SafeCallDelegate(string text);
-        private void SetStatusInfoText(string text)
-        {
-            if (txtSystemStatus.InvokeRequired)
-            {
-                var d = new SafeCallDelegate(SetStatusInfoText);
-                txtSystemStatus.Invoke(d, new object[] { text });
-            }
-            else
-            {
-                txtSystemStatus.Text = text;
-            }
-        }
-
-
-
-
 
         private void rbtOn_CheckedChanged(object sender, EventArgs e)
         {
@@ -183,33 +163,39 @@ namespace Aircon_Control_Windows
                 UnitConfig.HeaterFanOnly(true);
             }
         }
-
+        
+        //MQTT Function - Replaced.
         private void btnSendCommand_Click(object sender, EventArgs e)
         {
             btnSendCommand.Enabled = false;
-            string PUBLISH_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRequest";
+            /*string PUBLISH_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRequest";
             AMClient.MQTTClientConnect(URI).Wait(); //Connect MQTT Client.
             AMClient.MQTTPublish(PUBLISH_TOPIC, UnitConfig.GetJsonData()).Wait();
             AMClient.MQTTDisconnect().Wait();
+            */
+            UnitConfig.SendData(AMClient.GetIDToken());
+
 
             btnSendCommand.Enabled = true;
             
         }
-
+        
+        //MQTT Functions - Replaced.
         void RefreshDeviceStatus()
         {
             //Send MQTT message to request status refresh.
             string PUBLISH_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRequest";
             string SUBSCRIBE_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRealTime";
             string REFRESH_MESSAGE_CONTENT = "{\"SerialNo\":\"" + SYSTEM_MAC + "\",\"Status\":1}";
-
+            //MessageBox.Show(URI);
             AMClient.MQTTClientConnect(URI).Wait();
+            //SetMQTTStatus("MQTT Connected");
             AMClient.MQTTSubscribe(SUBSCRIBE_TOPIC).Wait();
             AMClient.MQTTPublish(PUBLISH_TOPIC, REFRESH_MESSAGE_CONTENT).Wait();
-
+            //SetMQTTStatus("MQTT Sent.");
             //MQTT client will disconnect after about a minute.
 
-            
+
         }
 
         private void btnLogon_Click(object sender, EventArgs e)
@@ -384,7 +370,7 @@ namespace Aircon_Control_Windows
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btnLogAuthTokens_Click(object sender, EventArgs e)
         {
             System.IO.StreamWriter writer = new System.IO.StreamWriter("tokenlog.txt");
             
@@ -423,9 +409,10 @@ namespace Aircon_Control_Windows
              
 
        
-        private void button5_Click(object sender, EventArgs e)
+        private void btnRefreshMQTT_Click(object sender, EventArgs e)
         {
-            RefreshDeviceStatus();
+            //RefreshDeviceStatus();
+            UnitConfig.RefreshData(AMClient.GetIDToken());
         }
 
         private void btnRefreshInfo_Click(object sender, EventArgs e)

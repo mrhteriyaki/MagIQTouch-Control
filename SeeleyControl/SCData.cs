@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +15,8 @@ namespace SeeleyControl
     {
         SLRemoteAccessRequest remoteAccessRequest = new SLRemoteAccessRequest();
         static string APIGateway = "57uh36mbv1.execute-api.ap-southeast-2.amazonaws.com";
+        //New API Server for data refresh and Control.
+        static string APIControlGateway = "https://tgjgb3bcf3.execute-api.ap-southeast-2.amazonaws.com/prod";
 
         public void SetSystemMAC(string SystemMAC)
         {
@@ -295,6 +298,33 @@ namespace SeeleyControl
 
 
 
+
+        public void RefreshData(string AWS_ID_TOKEN)
+        {
+            //Send PUT request to web api server.
+            string RefreshURI = APIControlGateway + "/v1/devices/" + GetSystemMAC();
+            string RefreshMessage = "{\"SerialNo\":\"" + GetSystemMAC() + "\",\"Status\":1}";
+
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + AWS_ID_TOKEN);
+            client.PutAsync(RefreshURI, (HttpContent)new StringContent(RefreshMessage));
+
+        }
+
+        public void SendData(string AWS_ID_TOKEN)
+        {
+            string mac = GetSystemMAC();
+            //Send PUT request to web api server.
+            string URI = APIControlGateway + "/v1/devices/" + mac;
+
+            HttpClient client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + AWS_ID_TOKEN);
+            client.PutAsync(URI, (HttpContent)new StringContent(GetJsonData()));
+        }
+
+
+
+
     }
 
 
@@ -481,6 +511,8 @@ namespace SeeleyControl
 
         [JsonProperty("WCFW")]
         public string WCFW { set; get; }
+        public bool NonLegacy { set; get; }
+        public bool Online { set; get; }
 
         public bool IsValid() => !string.IsNullOrEmpty(this.MacAddressId);
     }
@@ -494,11 +526,11 @@ namespace SeeleyControl
 
     public class SLSystemRunning
     {
+        [JsonProperty("TimeRunning")]
+        public string TimeRunning { set; get; }
+
         [JsonProperty("MacAddressId")]
         public string MacAddressId { set; get; }
-
-        [JsonProperty("Timestamp")]
-        public string Timestamp { set; get; }
 
         [JsonProperty("InternalTemp")]
         public float InternalTemp { set; get; }
@@ -841,6 +873,12 @@ namespace SeeleyControl
         [JsonProperty("SignalStrength")]
         public int SignalStrength { set; get;}
 
+        //Added in update.
+        [JsonProperty("Online")]
+        public bool Online { set; get; }
+        [JsonProperty("NonLegacy")]
+        public bool NonLegacy { set; get; }
+
 
     }
 
@@ -1149,12 +1187,19 @@ namespace SeeleyControl
             if (!(obj is SLRemoteAccessRequest))
                 return false;
             SLRemoteAccessRequest remoteAccessRequest = (SLRemoteAccessRequest)obj;
-            bool flag = !this.CThermosOrFanFlag || this.CThermosOrFan == remoteAccessRequest.CThermosOrFan;
-            return (!this.StandByFlag || this.StandBy == remoteAccessRequest.StandBy) && (!this.CFanSpeedFlag || this.CFanSpeed == remoteAccessRequest.CFanSpeed) && ((!this.CTempFlag || this.CTemp == remoteAccessRequest.CTemp) && (!this.CThermosOrFanFlag || this.CThermosOrFan == remoteAccessRequest.CThermosOrFan)) && ((!this.EvapCRunningFlag || this.EvapCRunning == remoteAccessRequest.EvapCRunning) && (!this.FAOCRunningFlag || this.FAOCRunning == remoteAccessRequest.FAOCRunning) && ((!this.IAOCRunningFlag || this.IAOCRunning == remoteAccessRequest.IAOCRunning) && (!this.HRunningFlag || this.HRunning == remoteAccessRequest.HRunning))) && ((!this.CFanOnlyFlag || this.CFanOnly == remoteAccessRequest.CFanOnly) && (!this.HFanOnlyFlag || this.HFanOnly == remoteAccessRequest.HFanOnly) && ((!this.HFanSpeedFlag || this.HFanSpeed == remoteAccessRequest.HFanSpeed) && (!this.HTempFlag || this.HTemp == remoteAccessRequest.HTemp)) && ((!this.FAOCTempFlag || this.FAOCTemp == remoteAccessRequest.FAOCTemp) && (!this.IAOCTempFlag || this.IAOCTemp == remoteAccessRequest.IAOCTemp) && ((!this.OnOffZone1Flag || this.OnOffZone1 == remoteAccessRequest.OnOffZone1) && (!this.Override1Flag || this.Override1 == remoteAccessRequest.Override1)))) && ((!this.TempZone1Flag || this.TempZone1 == remoteAccessRequest.TempZone1) && (!this.OnOffZone2Flag || this.OnOffZone2 == remoteAccessRequest.OnOffZone2) && ((!this.Override2Flag || this.Override2 == remoteAccessRequest.Override2) && (!this.TempZone2Flag || this.TempZone2 == remoteAccessRequest.TempZone2)) && ((!this.OnOffZone3Flag || this.OnOffZone3 == remoteAccessRequest.OnOffZone3) && (!this.Override3Flag || this.Override3 == remoteAccessRequest.Override3) && ((!this.TempZone3Flag || this.TempZone3 == remoteAccessRequest.TempZone3) && (!this.OnOffZone4Flag || this.OnOffZone4 == remoteAccessRequest.OnOffZone4))) && ((!this.Override4Flag || this.Override4 == remoteAccessRequest.Override4) && (!this.TempZone4Flag || this.TempZone4 == remoteAccessRequest.TempZone4) && ((!this.OnOffZone5Flag || this.OnOffZone5 == remoteAccessRequest.OnOffZone5) && (!this.Override5Flag || this.Override5 == remoteAccessRequest.Override5)) && ((!this.TempZone5Flag || this.TempZone5 == remoteAccessRequest.TempZone5) && (!this.OnOffZone6Flag || this.OnOffZone6 == remoteAccessRequest.OnOffZone6) && ((!this.Override6Flag || this.Override6 == remoteAccessRequest.Override6) && (!this.TempZone6Flag || this.TempZone6 == remoteAccessRequest.TempZone6))))) && ((!this.OnOffZone7Flag || this.OnOffZone7 == remoteAccessRequest.OnOffZone7) && (!this.Override7Flag || this.Override7 == remoteAccessRequest.Override7) && ((!this.TempZone7Flag || this.TempZone7 == remoteAccessRequest.TempZone7) && (!this.OnOffZone8Flag || this.OnOffZone8 == remoteAccessRequest.OnOffZone8)) && ((!this.Override8Flag || this.Override8 == remoteAccessRequest.Override8) && (!this.TempZone8Flag || this.TempZone8 == remoteAccessRequest.TempZone8) && ((!this.OnOffZone9Flag || this.OnOffZone9 == remoteAccessRequest.OnOffZone9) && (!this.Override9Flag || this.Override9 == remoteAccessRequest.Override9))) && ((!this.TempZone9Flag || this.TempZone9 == remoteAccessRequest.TempZone9) && (!this.OnOffZone10Flag || this.OnOffZone10 == remoteAccessRequest.OnOffZone10) && (!this.Override10Flag || this.Override10 == remoteAccessRequest.Override10))) && (!this.TempZone10Flag || this.TempZone10 == remoteAccessRequest.TempZone10);
+            int num = !this.CThermosOrFanFlag ? 1 : (this.CThermosOrFan == remoteAccessRequest.CThermosOrFan ? 1 : 0);
+            if (this.StandByFlag && this.StandBy != remoteAccessRequest.StandBy || this.CFanSpeedFlag && this.CFanSpeed != remoteAccessRequest.CFanSpeed || this.CTempFlag && this.CTemp != remoteAccessRequest.CTemp || this.CThermosOrFanFlag && this.CThermosOrFan != remoteAccessRequest.CThermosOrFan || this.EvapCRunningFlag && this.EvapCRunning != remoteAccessRequest.EvapCRunning || this.FAOCRunningFlag && this.FAOCRunning != remoteAccessRequest.FAOCRunning || this.IAOCRunningFlag && this.IAOCRunning != remoteAccessRequest.IAOCRunning || this.HRunningFlag && this.HRunning != remoteAccessRequest.HRunning || this.CFanOnlyFlag && this.CFanOnly != remoteAccessRequest.CFanOnly || this.HFanOnlyFlag && this.HFanOnly != remoteAccessRequest.HFanOnly || this.HFanSpeedFlag && this.HFanSpeed != remoteAccessRequest.HFanSpeed || this.HTempFlag && this.HTemp != remoteAccessRequest.HTemp || this.FAOCTempFlag && this.FAOCTemp != remoteAccessRequest.FAOCTemp || this.IAOCTempFlag && this.IAOCTemp != remoteAccessRequest.IAOCTemp || this.OnOffZone1Flag && this.OnOffZone1 != remoteAccessRequest.OnOffZone1 || this.Override1Flag && this.Override1 != remoteAccessRequest.Override1 || this.TempZone1Flag && this.TempZone1 != remoteAccessRequest.TempZone1 || this.OnOffZone2Flag && this.OnOffZone2 != remoteAccessRequest.OnOffZone2 || this.Override2Flag && this.Override2 != remoteAccessRequest.Override2 || this.TempZone2Flag && this.TempZone2 != remoteAccessRequest.TempZone2 || this.OnOffZone3Flag && this.OnOffZone3 != remoteAccessRequest.OnOffZone3 || this.Override3Flag && this.Override3 != remoteAccessRequest.Override3 || this.TempZone3Flag && this.TempZone3 != remoteAccessRequest.TempZone3 || this.OnOffZone4Flag && this.OnOffZone4 != remoteAccessRequest.OnOffZone4 || this.Override4Flag && this.Override4 != remoteAccessRequest.Override4 || this.TempZone4Flag && this.TempZone4 != remoteAccessRequest.TempZone4 || this.OnOffZone5Flag && this.OnOffZone5 != remoteAccessRequest.OnOffZone5 || this.Override5Flag && this.Override5 != remoteAccessRequest.Override5 || this.TempZone5Flag && this.TempZone5 != remoteAccessRequest.TempZone5 || this.OnOffZone6Flag && this.OnOffZone6 != remoteAccessRequest.OnOffZone6 || this.Override6Flag && this.Override6 != remoteAccessRequest.Override6 || this.TempZone6Flag && this.TempZone6 != remoteAccessRequest.TempZone6 || this.OnOffZone7Flag && this.OnOffZone7 != remoteAccessRequest.OnOffZone7 || this.Override7Flag && this.Override7 != remoteAccessRequest.Override7 || this.TempZone7Flag && this.TempZone7 != remoteAccessRequest.TempZone7 || this.OnOffZone8Flag && this.OnOffZone8 != remoteAccessRequest.OnOffZone8 || this.Override8Flag && this.Override8 != remoteAccessRequest.Override8 || this.TempZone8Flag && this.TempZone8 != remoteAccessRequest.TempZone8 || this.OnOffZone9Flag && this.OnOffZone9 != remoteAccessRequest.OnOffZone9 || this.Override9Flag && this.Override9 != remoteAccessRequest.Override9 || this.TempZone9Flag && this.TempZone9 != remoteAccessRequest.TempZone9 || this.OnOffZone10Flag && this.OnOffZone10 != remoteAccessRequest.OnOffZone10 || this.Override10Flag && this.Override10 != remoteAccessRequest.Override10)
+                return false;
+            return !this.TempZone10Flag || this.TempZone10 == remoteAccessRequest.TempZone10;
         }
 
-        
+
 
     }
+
+
+   
+
+   
 
 }
