@@ -9,6 +9,7 @@ Basic example library and test application to control Seeley MagIQTouch WiFi HVA
 
 
 Official Android Mobile App update occured in April 2022.
+
 Update has removed MQTT functions and updated AWS IDs.
 
 Mobile update has occured on Nov 10 - Changes not inspected.
