@@ -2,7 +2,9 @@
 Basic example library and test application to control Seeley MagIQTouch WiFi HVAC controllers.
 
 **AWSMQTT** - authentication with AWS IoT.
+
 **SeeleyControl** - Request builder.
+
 **Aircon Control Windows** - Windows GUI Test Tool
 
 
