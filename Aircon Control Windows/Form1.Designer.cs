@@ -312,7 +312,6 @@ namespace Aircon_Control_Windows
             this.btnSendCommand.TabIndex = 0;
             this.btnSendCommand.Text = "Send Command";
             this.btnSendCommand.UseVisualStyleBackColor = true;
-            this.btnSendCommand.Click += new System.EventHandler(this.btnSendCommand_Click);
             // 
             // groupBox5
             // 

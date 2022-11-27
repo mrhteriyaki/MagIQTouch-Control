@@ -1,3 +1,12 @@
-Basic example application to control Seeley MagIQTouch WiFi enabled HVAC controllers.
+# Seeley MagIQTouch WiFi
+Basic example library and test application to control Seeley MagIQTouch WiFi HVAC controllers.
 
-April 2022 Update to API has moved MQTT functions to new Web API endpoint, updated to include new functions.
+**AWSMQTT** - authentication with AWS IoT.
+**SeeleyControl** - Request builder.
+**Aircon Control Windows** - Windows GUI Test Tool
+
+
+Official Android Mobile App update occured in April 2022.
+Update has removed MQTT functions and updated AWS IDs.
+
+Mobile update has occured on Nov 10 - Changes not inspected.

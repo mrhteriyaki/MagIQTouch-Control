@@ -8,17 +8,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-
-using MQTTnet.Client.Receiving;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Disconnecting;
-
 using AWSMQTT;
 using SeeleyControl;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using MQTTnet;
+
 using System.Reflection;
 
 namespace Aircon_Control_Windows
@@ -65,58 +60,10 @@ namespace Aircon_Control_Windows
                 SW.Close();
             }
 
-            /*
-            AMClient.AWS_IOT_GATEWAY = "ab7hzia9uew8g-ats.iot.ap-southeast-2.amazonaws.com";
-            AMClient.AWS_USER_POOL_ID = "ap-southeast-2_uw5VVNlib";
-            AMClient.AWS_CLIENT_ID = "6e1lu9fchv82uefiarsp0290v9";
-            AMClient.AWS_POOL_ID = "ap-southeast-2:0ed20c23-4af8-4408-86fc-b78689a5c7a7";
-            AMClient.AWS_REGION_ENDPOINT = Amazon.RegionEndpoint.APSoutheast2;
-            */
-
-            
-
-
-            //Initialise MQTT Client.
-            //AMClient.MQTTClientInit((IMqttClientConnectedHandler)null, (IMqttApplicationMessageReceivedHandler)null, (IMqttClientDisconnectedHandler)null);
-            AMClient.MQTTClientInit(MQTTConnectedHandler, MQTTMessageHandler, MQTTDisconnectHandler);
-
-
-        }
-
-        //MqttClientConnectedEventArgs
-        //MqttApplicationMessageReceivedEventArgs
-        //MqttClientDisconnectedEventArgs
-
-
-        //Event when MQTT Client connected.
-        void MQTTConnectedHandler(MqttClientConnectedEventArgs e)
-        {
-            //MessageBox.Show("Connected");
-
-       
-        }
-
-        void MQTTMessageHandler(MqttApplicationMessageReceivedEventArgs e)
-        {
-            //MessageBox.Show(e.ApplicationMessage.ToString());
-           string StatusInfoStr = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
-
-            JObject SystemStatus = JObject.Parse(StatusInfoStr);
-            //MessageBox.Show(SystemStatus["SystemOn"].ToString());
-            //MessageBox.Show(SystemStatus["TimeRunning"].ToString());
-          
-            //SetMQTTStatus(StatusInfoStr);
-
-        }
-
-        //Event when mqtt client disconnects
-
-        void MQTTDisconnectHandler(MqttClientDisconnectedEventArgs e)
-        {
-            //MessageBox.Show("Disconnected");
             
         }
 
+        
         private void rbtOn_CheckedChanged(object sender, EventArgs e)
         {
             UnitConfig.TurnOn();
@@ -164,40 +111,7 @@ namespace Aircon_Control_Windows
             }
         }
         
-        //MQTT Function - Replaced.
-        private void btnSendCommand_Click(object sender, EventArgs e)
-        {
-            btnSendCommand.Enabled = false;
-            /*string PUBLISH_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRequest";
-            AMClient.MQTTClientConnect(URI).Wait(); //Connect MQTT Client.
-            AMClient.MQTTPublish(PUBLISH_TOPIC, UnitConfig.GetJsonData()).Wait();
-            AMClient.MQTTDisconnect().Wait();
-            */
-            UnitConfig.SendData(AMClient.GetIDToken());
-
-
-            btnSendCommand.Enabled = true;
-            
-        }
-        
-        //MQTT Functions - Replaced.
-        void RefreshDeviceStatus()
-        {
-            //Send MQTT message to request status refresh.
-            string PUBLISH_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRequest";
-            string SUBSCRIBE_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRealTime";
-            string REFRESH_MESSAGE_CONTENT = "{\"SerialNo\":\"" + SYSTEM_MAC + "\",\"Status\":1}";
-            //MessageBox.Show(URI);
-            AMClient.MQTTClientConnect(URI).Wait();
-            //SetMQTTStatus("MQTT Connected");
-            AMClient.MQTTSubscribe(SUBSCRIBE_TOPIC).Wait();
-            AMClient.MQTTPublish(PUBLISH_TOPIC, REFRESH_MESSAGE_CONTENT).Wait();
-            //SetMQTTStatus("MQTT Sent.");
-            //MQTT client will disconnect after about a minute.
-
-
-        }
-
+      
         private void btnLogon_Click(object sender, EventArgs e)
         {
             CheckLogon();
@@ -382,29 +296,6 @@ namespace Aircon_Control_Windows
             writer.WriteLine("Expiry:" + AMClient.GetExpiry());
             writer.Close();
 
-
-            //AMClient.RefreshCognitoAWScredentials();
-
-            //AMClient.LoginUser(); //Connect to AWS for Auth Tokens.
-            //URI = AMClient.GenerateURI(); //Generate AWS URI with Signature V4 Auth.
-
-
-            /*
-            string SUBSCRIBE_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRealTime";
-            string PUBLISH_TOPIC = "SeeleyIoT/" + SYSTEM_MAC + "/MobileRequest";
-
-
-
-            //Initialise MQTT Client.
-            AMClient.MQTTClientInit((IMqttClientConnectedHandler)null, (IMqttApplicationMessageReceivedHandler)null, (IMqttClientDisconnectedHandler)null);
-
-            AMClient.MQTTClientConnect(URI).Wait(); //Connect MQTT Client.
-
-            //AMClient.MQTTSubscribe("SeeleyIoT/9070652C0B27/MobileRealTime").Wait();
-           // AMClient.MQTTPublish(PUBLISH_TOPIC, UnitConfig.GetJsonData()).Wait();
-
-            ShowInfo();
-            */
         }
              
 

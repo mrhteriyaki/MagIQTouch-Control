@@ -107,10 +107,15 @@ namespace SeeleyControl
         public void TurnOff()
         {
             remoteAccessRequest.StandBy = 1;
+            remoteAccessRequest.HRunning = 0;
+            remoteAccessRequest.EvapCRunning = 0;           
+            remoteAccessRequest.FAOCRunning = 0;
+            remoteAccessRequest.IAOCRunning = 0;
         }
         public void TurnOn()
         {
             remoteAccessRequest.StandBy = 0;
+            
         }
 
         public void EnableCooler()
@@ -311,16 +316,33 @@ namespace SeeleyControl
 
         }
 
-        public void SendData(string AWS_ID_TOKEN)
+        public string SendData(string AWS_ID_TOKEN)
         {
             string mac = GetSystemMAC();
             //Send PUT request to web api server.
             string URI = APIControlGateway + "/v1/devices/" + mac;
+            WebRequest request = WebRequest.Create(URI);
+            request.Headers.Add("Authorization", "Bearer " + AWS_ID_TOKEN); //Authentication header.
+            request.Method = "PUT";
 
-            HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + AWS_ID_TOKEN);
-            client.PutAsync(URI, (HttpContent)new StringContent(GetJsonData()));
+            var bytes = Encoding.ASCII.GetBytes(GetJsonData());
+            using (var requestStream = request.GetRequestStream())
+            {
+                requestStream.Write(bytes, 0, bytes.Length);
+            }
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Stream dataStream = response.GetResponseStream();
+            StreamReader reader = new StreamReader(dataStream);
+            string responseFromServer = reader.ReadToEnd();
+            reader.Close();
+            dataStream.Close();
+            response.Close();
+
+            return response.StatusDescription + "\n" + responseFromServer;
+
         }
+
 
 
 

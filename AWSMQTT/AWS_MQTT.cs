@@ -23,25 +23,20 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.Extensions.CognitoAuthentication;
 
 
-using MQTTnet;
-using MQTTnet.Client;
-using MQTTnet.Client.Receiving;
-using MQTTnet.Client.Connecting;
-using MQTTnet.Client.Disconnecting;
-using MQTTnet.Client.Options;
-
-
 namespace AWSMQTT
 {
     public class AWS_MQTT
     {
-        string AWS_IOT_GATEWAY; //example.iot.ap-southeast-2.amazonaws.com
-        string AWS_USER_POOL_ID;
-        string AWS_CLIENT_ID;
-        string AWS_POOL_ID;
-        string MQTT_CLIENT_ID;
-        
-        RegionEndpoint AWS_REGION_ENDPOINT;
+        static string AWS_IOT_GATEWAY = "ab7hzia9uew8g-ats.iot.ap-southeast-2.amazonaws.com";
+        static string AWS_USER_POOL_ID = "ap-southeast-2_uw5VVNlib";
+
+        //AWS_CLIENT_ID = "6e1lu9fchv82uefiarsp0290v9"; //Replaced on app update - April 2022.      
+        static string AWS_CLIENT_ID = "afh7fftbb0fg2rnagdbgd9b7b";
+
+        //AWS_POOL_ID = "ap-southeast-2:0ed20c23-4af8-4408-86fc-b78689a5c7a7"; //Replaced on app update - April 2022.      
+        static string AWS_POOL_ID = "ap-southeast-2:87af6d7b-28ef-4014-88f1-67b19c361221";
+
+        static RegionEndpoint AWS_REGION_ENDPOINT = Amazon.RegionEndpoint.APSoutheast2;
 
         static ImmutableCredentials AWS_CREDENTIALS;
         static CognitoAWSCredentials COGNITO_AWS_CREDENTIALS;
@@ -55,74 +50,7 @@ namespace AWSMQTT
             AWS_Password = password;
         }
 
-        public MqttClient mqClient;
 
-
-        public void MQTTClientInit()
-        {
-            AWS_IOT_GATEWAY = "ab7hzia9uew8g-ats.iot.ap-southeast-2.amazonaws.com";
-            AWS_USER_POOL_ID = "ap-southeast-2_uw5VVNlib";
-            //AWS_CLIENT_ID = "6e1lu9fchv82uefiarsp0290v9"; //Replaced on app update.
-            AWS_CLIENT_ID = "afh7fftbb0fg2rnagdbgd9b7b";
-
-            //AWS_POOL_ID = "ap-southeast-2:0ed20c23-4af8-4408-86fc-b78689a5c7a7"; //Replaced on app update.
-            AWS_POOL_ID = "ap-southeast-2:87af6d7b-28ef-4014-88f1-67b19c361221";
-            AWS_REGION_ENDPOINT = Amazon.RegionEndpoint.APSoutheast2;
-
-            //Set MQTT Client ID
-            Random rnd = new Random();
-            MQTT_CLIENT_ID = "MagIQ" + rnd.Next().ToString();
-
-            MqttFactory mqFactory = new MqttFactory();
-            mqClient = (MqttClient)mqFactory.CreateMqttClient();
-            
-        }
-        //MqttClientConnectedEventArgs
-        //MqttApplicationMessageReceivedEventArgs
-        //MqttClientDisconnectedEventArgs
-        public void MQTTClientInit(Action<MqttClientConnectedEventArgs> ConnectedHandler, Action<MqttApplicationMessageReceivedEventArgs> MessageReceivedHander, Action<MqttClientDisconnectedEventArgs> DisconnectHandler)
-        {
-            MQTTClientInit();
-            //Event Handlers for MQTT
-            mqClient.UseConnectedHandler(ConnectedHandler);
-            mqClient.UseApplicationMessageReceivedHandler(MessageReceivedHander);
-            mqClient.UseDisconnectedHandler(DisconnectHandler);
-
-        }
-
-
-
-
-        public async Task MQTTClientConnect(string URI)
-        {
-            MqttClientOptionsBuilder MQOptions = new MqttClientOptionsBuilder();
-            MQOptions.WithClientId(MQTT_CLIENT_ID);
-            MQOptions.WithWebSocketServer(URI);
-            MQOptions.WithProtocolVersion(MQTTnet.Formatter.MqttProtocolVersion.V311);
-            MQOptions.WithTls();
-            
-            await mqClient.ConnectAsync(MQOptions.Build()).ConfigureAwait(false);
-
-            
-        }
-
-        public async Task MQTTDisconnect()
-        {
-           await mqClient.DisconnectAsync();
-        }
-
-        public async Task MQTTPublish(string Topic, string Payload)
-        {
-            await mqClient.PublishAsync(Topic, Payload).ConfigureAwait(false);
-        }
-
-        public async Task MQTTSubscribe(string Topic)
-        {
-            await mqClient.SubscribeAsync(Topic).ConfigureAwait(false);
-        }
-       
-      
-       
         public string UpperCaseUrlEncode(string s)
         {
             
@@ -138,8 +66,21 @@ namespace AWSMQTT
             return new string(temp);
         }
 
+        bool first_login = true;
+        DateTime tokenexpiry = DateTime.Now;
+
+        public void ResetValidation()
+        {
+            first_login = true;
+        }
+
         public void LoginUser()
         {
+            if (first_login == false)
+            {
+                RefreshToken();
+                return;
+            }
                 AmazonCognitoIdentityProviderClient _provider = new AmazonCognitoIdentityProviderClient((AWSCredentials)new AnonymousAWSCredentials(), RegionEndpoint.APSoutheast2);
                 CognitoUserPool pool = new CognitoUserPool(AWS_USER_POOL_ID, AWS_CLIENT_ID, _provider);
                 CognitoUser cognitoUser = new CognitoUser(AWS_Username, AWS_CLIENT_ID, pool, _provider);
@@ -149,25 +90,43 @@ namespace AWSMQTT
                 }).Wait();
                 COGNITO_USER = cognitoUser;
 
-                RefreshCognitoAWScredentials();
+            SetCognitoAWScredentials();
+            tokenexpiry = DateTime.Now.AddHours(1); //default 1 hour token.
+
+            first_login = false;
+
+      
         }
 
 
-        
+
         public void RefreshToken()
         {
-               COGNITO_USER.SessionTokens = new CognitoUserSession((string)null, COGNITO_USER.SessionTokens.AccessToken, COGNITO_USER.SessionTokens.RefreshToken, DateTime.Now, DateTime.Now.AddDays(3.0));
+            if (tokenexpiry > DateTime.Now)
+            {
+                //Token still valid, skip refresh.
+                return;
+            }
+
+            COGNITO_USER.SessionTokens = new CognitoUserSession((string)null, COGNITO_USER.SessionTokens.AccessToken, COGNITO_USER.SessionTokens.RefreshToken, DateTime.Now, DateTime.Now.AddDays(3.0));
                COGNITO_USER.StartWithRefreshTokenAuthAsync(new InitiateRefreshTokenAuthRequest()
                 {
                     AuthFlowType = AuthFlowType.REFRESH_TOKEN
                 }).Wait();
-                
-               RefreshCognitoAWScredentials();
 
+            SetCognitoAWScredentials();
+            
+            //update expiry
+            tokenexpiry = DateTime.Now.AddHours(1);
+            
+            //Refresh resets this expiration by 1 hour.
+            //COGNITO_USER.SessionTokens.ExpirationTime
+            
+            
         }
 
 
-        public void RefreshCognitoAWScredentials()
+        public void SetCognitoAWScredentials()
         {
             COGNITO_AWS_CREDENTIALS = COGNITO_USER.GetCognitoAWSCredentials(AWS_POOL_ID, AWS_REGION_ENDPOINT);
             AWS_CREDENTIALS = COGNITO_AWS_CREDENTIALS.GetCredentials();
