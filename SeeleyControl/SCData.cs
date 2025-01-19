@@ -17,7 +17,7 @@ namespace SeeleyControl
         static string APIGateway = "57uh36mbv1.execute-api.ap-southeast-2.amazonaws.com";
         //New API Server for data refresh and Control.
         static string APIControlGateway = "https://tgjgb3bcf3.execute-api.ap-southeast-2.amazonaws.com/prod";
-
+        
         public void SetSystemMAC(string SystemMAC)
         {
             remoteAccessRequest.SerialNo = SystemMAC;
@@ -301,7 +301,21 @@ namespace SeeleyControl
             return new StreamReader(response.GetResponseStream()).ReadToEnd();
         }
 
-
+        static public void Download(string URI, string AWS_ID_TOKEN)
+        {
+            HttpWebRequest request = WebRequest.Create(URI) as HttpWebRequest;
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Stream responseStream = response.GetResponseStream();
+            FileStream fileStream = File.Create("download.bin");
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = responseStream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                fileStream.Write(buffer, 0, bytesRead);
+            }
+            fileStream.Flush();
+            fileStream.Close();
+        }
 
 
         public void RefreshData(string AWS_ID_TOKEN)

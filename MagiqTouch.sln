@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aircon Control Windows", "Aircon Control Windows.csproj", "{9F3F4707-8EB1-46EC-A75E-0564894BB006}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aircon Control Windows", "Aircon Control Windows\Aircon Control Windows.csproj", "{9F3F4707-8EB1-46EC-A75E-0564894BB006}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWSMQTT", "..\AWSMQTT\AWSMQTT.csproj", "{9EED72DB-1EEF-44CF-BE73-DF1EE9522B20}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AWSMQTT", "AWSMQTT\AWSMQTT.csproj", "{9EED72DB-1EEF-44CF-BE73-DF1EE9522B20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeeleyControl", "..\SeeleyControl\SeeleyControl.csproj", "{9DAABECB-BD74-4183-A21E-9AB6A8DC1918}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeeleyControl", "SeeleyControl\SeeleyControl.csproj", "{9DAABECB-BD74-4183-A21E-9AB6A8DC1918}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

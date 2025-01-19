@@ -69,6 +69,7 @@ namespace Aircon_Control_Windows
             this.lblTouchCount = new System.Windows.Forms.Label();
             this.lblZoneTemps = new System.Windows.Forms.Label();
             this.btnRefreshInfo = new System.Windows.Forms.Button();
+            this.btnDownload = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -312,6 +313,7 @@ namespace Aircon_Control_Windows
             this.btnSendCommand.TabIndex = 0;
             this.btnSendCommand.Text = "Send Command";
             this.btnSendCommand.UseVisualStyleBackColor = true;
+            this.btnSendCommand.Click += new System.EventHandler(this.btnSendCommand_Click);
             // 
             // groupBox5
             // 
@@ -439,7 +441,7 @@ namespace Aircon_Control_Windows
             this.btnRefresh.TabIndex = 13;
             this.btnRefresh.Text = "Send Device Refresh Command";
             this.btnRefresh.UseVisualStyleBackColor = true;
-            this.btnRefresh.Click += new System.EventHandler(this.btnRefreshMQTT_Click);
+            this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
             // 
             // groupBox6
             // 
@@ -480,11 +482,22 @@ namespace Aircon_Control_Windows
             this.btnRefreshInfo.UseVisualStyleBackColor = true;
             this.btnRefreshInfo.Click += new System.EventHandler(this.btnRefreshInfo_Click);
             // 
+            // btnDownload
+            // 
+            this.btnDownload.Location = new System.Drawing.Point(732, 104);
+            this.btnDownload.Name = "btnDownload";
+            this.btnDownload.Size = new System.Drawing.Size(158, 40);
+            this.btnDownload.TabIndex = 18;
+            this.btnDownload.Text = "Download Firmware";
+            this.btnDownload.UseVisualStyleBackColor = true;
+            this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1150, 817);
+            this.Controls.Add(this.btnDownload);
             this.Controls.Add(this.btnRefreshInfo);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.btnRefresh);
@@ -562,6 +575,7 @@ namespace Aircon_Control_Windows
         private System.Windows.Forms.Label lblZoneTemps;
         private System.Windows.Forms.Button btnRefreshInfo;
         private System.Windows.Forms.Label lblTouchCount;
+        private System.Windows.Forms.Button btnDownload;
     }
 }
 

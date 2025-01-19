@@ -300,7 +300,7 @@ namespace Aircon_Control_Windows
              
 
        
-        private void btnRefreshMQTT_Click(object sender, EventArgs e)
+        private void btnRefresh_Click(object sender, EventArgs e)
         {
             //RefreshDeviceStatus();
             UnitConfig.RefreshData(AMClient.GetIDToken());
@@ -311,6 +311,14 @@ namespace Aircon_Control_Windows
             ShowInfo();
         }
 
-       
+        private void btnDownload_Click(object sender, EventArgs e)
+        {
+            SCData.Download("https://s3-ap-southeast-2.amazonaws.com/magiqtouch-iot-firmware/STM32/STM32/DEV/0_17.bin", AMClient.GetIDToken());
+        }
+
+        private void btnSendCommand_Click(object sender, EventArgs e)
+        {
+            UnitConfig.SendData(AMClient.GetIDToken());
+        }
     }
 }
